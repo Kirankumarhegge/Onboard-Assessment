@@ -1,7 +1,7 @@
 # Onboard Assess with Auth Flow
 
 ## Description
-Onboard Assess is an assessment platform where users sign up with a unique name. The assessment consists of single and multiple-choice questions. Sub-questions are dynamically displayed based on the user's answers to the main questions. For example, the first question is "Do you exercise?" with two options: Yes or No. If the user answers "Yes", a sub-question is displayed. If the user answers "No", the sub-question is skipped, and the user is moved to the next main question.
+Onboard Assess is an assessment platform where users sign up with a unique name and password. The assessment consists of single and multiple-choice questions. Sub-questions are dynamically displayed based on the user's answers to the main questions. For example, the first question is "Do you exercise?" with two options: Yes or No. If the user answers "Yes", a sub-question is displayed. If the user answers "No", the sub-question is skipped, and the user is moved to the next main question.
 
 All answers are saved in the database, and users can navigate back to previous screens to view their answers. If a user navigates back from the third question to the second question (a child question), the backend checks if the conditions from the first question match before showing the second question. If not, the user is redirected to the first question. Upon signup, an access token is issued and validated with all subsequent APIs. If the token is missing or invalid, the user is redirected to an error page.
 
