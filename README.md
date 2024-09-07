@@ -6,12 +6,15 @@ Onboard Assess is an assessment platform where users sign up with a unique name.
 All answers are saved in the database, and users can navigate back to previous screens to view their answers. If a user navigates back from the third question to the second question (a child question), the backend checks if the conditions from the first question match before showing the second question. If not, the user is redirected to the first question. Upon signup, an access token is issued and validated with all subsequent APIs. If the token is missing or invalid, the user is redirected to an error page.
 
 ## Table of Contents
-1. [Screenshots and Video](#screenshots-and-video)
+1. [Video](#screenshots-and-video)
 2. [Technologies](#technologies)
 3. [File Setup](#file-setup)
+4. [How to use](#How-to-use)
 
 ## Screenshots and Video
-https://github.com/user-attachments/assets/3c714b73-295e-4623-a343-478dec73a7ab
+
+https://github.com/user-attachments/assets/c0795493-9811-49db-a771-880550018a9e
+
 
 
 ## Technologies
