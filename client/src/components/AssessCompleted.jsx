@@ -6,7 +6,7 @@ const AssessCompleted = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gray-300 flex flex-col items-center justify-center py-6 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
                 <div className="text-center">
                     <img className="w-16 h-16 mx-auto mb-4 text-green-500" src="https://cdni.iconscout.com/illustration/premium/thumb/happy-chat-bot-illustration-download-in-svg-png-gif-file-formats--artificial-intelligence-robot-pack-science-technology-illustrations-7207939.png"></img>

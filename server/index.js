@@ -4,6 +4,8 @@ const cookieparser = require("cookie-parser");
 const MongoDBConnection = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const assessRoutes = require('./routes/assessRoutes');
+const authenticateJWT = require('./middleware/authenticateJWT');
+
 
 const app = express();
 app.use(express.json());
@@ -16,8 +18,11 @@ credentials: true
 MongoDBConnection();
 
 app.use('/user', userRoutes);
+app.use(authenticateJWT);
 app.use('/assess', assessRoutes);
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });
+
+

@@ -53,89 +53,62 @@ const OnBoard = () => {
         }
     }, [currentQuestionIndex, questions, answers]);
 
-    const handleAnswerChange = (option) => {
-        const currentQuestion = questions[currentQuestionIndex];
-
+    const handleAnswerChange = (currentQuestion, selectedOption) => {
         setSelectedAnswers((prev) => {
-            const isSelected = prev.some((ans) => ans.optionId === option.optionId);
-            if (isSelected) {
-                return prev.filter((ans) => ans.optionId !== option.optionId);
-            } else {
-                return [...prev, option];
+            if (currentQuestion.optionType == "SINGLE_CHOICE") {
+                return [selectedOption];
+            } else if (currentQuestion.optionType == "MULTIPLE_CHOICE"){
+                return [...prev, selectedOption];
             }
         });
-
     };
 
-    const handleNext = async () => {
-        const currentQuestion = questions[currentQuestionIndex];
-
-        if (!answers[currentQuestion.QuesId]) {
-            const answerData = {
-                nickname,
-                question: currentQuestion,
-                answer: selectedAnswers,
-            };
-
-            try {
-                let response = await axios.post("http://localhost:3001/assess/submit", answerData);
-
-                if (response.error == "Invalid token") {
-                    navigate('/error', { state: { errorMessage: "Token is Not correct" } });
-                }
-                else {
-                    setAnswers((prev) => ({ ...prev, [currentQuestion.QuesId]: selectedAnswers }));
-                }
-
-            } catch (error) {
-                navigate('/error', { state: { errorMessage: "Token is Not correct" } });
-            }
-        }
-
-        if (currentQuestion.hasChildQuestion == true) {
-            if (selectedAnswers.some((ans) => ans.optionId === currentQuestion.childCondition)) {
-                setCurrentQuestionIndex(currentQuestionIndex + 1);
-            } else {
-                setCurrentQuestionIndex(currentQuestionIndex + 2);
-            }
-        } else {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        }
-
+    const handleNext = async (currentQuestion) => {
         if (currentQuestionIndex >= questions.length - 1) {
             navigate("/completed");
             return;
         }
 
+        try {
+            let response = await axios.post("http://localhost:3001/assess/submit", {
+                nickname,
+                question: currentQuestion,
+                answer: selectedAnswers,
+            });
+            setAnswers((prev) => ({ ...prev, [currentQuestion.QuesId]: selectedAnswers }));
+
+            const assessQues = await axios.get("http://localhost:3001/assess", {
+                headers: { nickname }
+            });
+            setQuestions(assessQues.data);
+
+        } catch (error) {
+            navigate('/error', { state: { errorMessage: "Token is Not correct" } });
+        }
+
+        let nextIndex = currentQuestionIndex + 1;
+        if (currentQuestion.hasChildQuestion) {
+            const hasChildCondition = selectedAnswers.some((ans) => ans.optionId === currentQuestion.childCondition);
+            nextIndex = hasChildCondition ? currentQuestionIndex + 1 : currentQuestionIndex + 2;
+        }
+        setCurrentQuestionIndex(nextIndex);
     };
 
     const handlePrev = async () => {
         if (currentQuestionIndex > 0) {
             const prevIndex = currentQuestionIndex - 1;
             const prevQuestion = questions[prevIndex];
-            const currentQuestion = questions[currentQuestionIndex];
 
             if (prevQuestion.isChildQuestion === true) {
-                const prevPrevIndex = currentQuestionIndex - 2;
-                const prevPrevQuestion = questions[prevPrevIndex];
-
+                const prevPrevQuestion = questions[prevIndex - 1];
                 if (prevPrevQuestion && prevPrevQuestion.ansValues[0].optionId === prevPrevQuestion.childCondition) {
                     setCurrentQuestionIndex(prevIndex);
                 } else {
-                    setCurrentQuestionIndex(currentQuestionIndex - 2);
+                    setCurrentQuestionIndex(prevIndex - 1);
                 }
             } else if (prevQuestion && prevQuestion.isChildQuestion === false) {
 
                 setCurrentQuestionIndex(prevIndex);
-            }
-
-            try {
-                const response = await axios.get("http://localhost:3001/assess", {
-                    headers: { nickname },
-                });
-                setQuestions(response.data);
-            } catch (error) {
-                navigate('/error', { state: { errorMessage: "Token is Not correct" } });
             }
         }
     };
@@ -166,8 +139,7 @@ const OnBoard = () => {
                                         id={option.optionId}
                                         value={option.optionValue}
                                         checked={selectedAnswers.some((ans) => ans.optionId === option.optionId)}
-                                        onChange={() => handleAnswerChange(option)}
-                                        disabled={isAnswerGiven}
+                                        onChange={() => handleAnswerChange(currentQuestion, option)}
                                         className={`form-${currentQuestion.entryType === "MULTIPLE_CHOICE" ? "checkbox" : "radio"} h-4 w-4 text-indigo-600`}
                                     />
                                     <label htmlFor={option.optionId} className="text-gray-700">
@@ -184,7 +156,7 @@ const OnBoard = () => {
                                 Previous
                             </button>
                             <button
-                                onClick={handleNext}
+                                onClick={() => handleNext(currentQuestion)}
                                 className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500"
                                 disabled={selectedAnswers.length === 0}
                             >

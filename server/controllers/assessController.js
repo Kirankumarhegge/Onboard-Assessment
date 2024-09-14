@@ -1,21 +1,8 @@
 require('dotenv').config();
 const AssessModel = require('../model/onboard');
-const jwt = require("jsonwebtoken");
 
 exports.getQuestions = async (req, res) => {
     try {
-        const token = req.cookies.accessToken
-        if (!token) {
-            return res.status(401).json({ error: 'Access denied, token missing!' });
-        }
-
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ error: 'Invalid token' });
-            }
-            req.user = user;
-        });
-
         const userAssessAnsData = await AssessModel.find({ entryType: "ANSWERED", nickname: req.headers.nickname });
         const assessData = await AssessModel.find({ entryType: "QUESTION" });
 
@@ -38,28 +25,27 @@ exports.getQuestions = async (req, res) => {
 
 exports.submitAnswer = async (req, res) => {
     try {
-        const token = req.cookies.accessToken
-        if (!token) {
-            return res.status(401).json({ error: 'Access denied, token missing!' });
-        }
-
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ error: 'Invalid token' });
-            }
-            req.user = user;
-        });
-
         const { nickname, question, answer } = req.body;
-        let itemToBeSaved = {
-            ...question,
-            nickname,
-            ansValues: answer,
-            entryType: "ANSWERED"
-        };
-        delete itemToBeSaved._id;
+        let assessData;
+        const UserAnsData = await AssessModel.findOne({ nickname : nickname, QuesId : question.QuesId });
+        if(UserAnsData){
+            assessData = await AssessModel.updateOne(
+                { nickname: nickname, QuesId: question.QuesId, entryType: "ANSWERED" },
+                { $set: { ansValues: answer } }  // Use $set to update the ansValues field
+            );
+        }
+        else{
+            let itemToBeSaved = {
+                ...question,
+                nickname,
+                ansValues: answer,
+                entryType: "ANSWERED"
+            };
+            delete itemToBeSaved._id;
 
-        const assessData = await AssessModel.create(itemToBeSaved);
+            assessData = await AssessModel.create(itemToBeSaved);
+        }
+            
         return res.status(200).json(assessData);
     } catch (err) {
         console.error(err);
